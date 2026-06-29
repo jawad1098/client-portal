@@ -85,7 +85,7 @@ model User {
 
   // Set when role = CLIENT: which client company this user belongs to / manages
   clientId      String?
-  client        Client?   @relation(fields: [clientId], references: [id])
+  client        Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   assignedTasks Task[]    @relation("AssignedTo")
   createdTasks  Task[]    @relation("CreatedBy")
@@ -178,7 +178,7 @@ model Task {
   updatedAt     DateTime   @updatedAt
 
   clientId      String?
-  client        Client?    @relation(fields: [clientId], references: [id])
+  client        Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
 
   assigneeId    String?
   assignee      User?      @relation("AssignedTo", fields: [assigneeId], references: [id])
@@ -220,7 +220,7 @@ model Invite {
   token       String       @unique
   status      InviteStatus @default(PENDING)
   clientId    String?
-  client      Client?      @relation(fields: [clientId], references: [id])
+  client      Client?      @relation(fields: [clientId], references: [id], onDelete: Cascade)
   invitedById String
   invitedBy   User         @relation("InvitedBy", fields: [invitedById], references: [id])
   createdAt   DateTime     @default(now())

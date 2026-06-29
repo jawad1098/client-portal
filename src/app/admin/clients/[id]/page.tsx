@@ -24,6 +24,7 @@ import { InviteLink } from "./invite-link";
 import { MilestoneToggle } from "./milestone-toggle";
 import { InvoiceStatusButtons } from "./invoice-status-buttons";
 import { ImpersonateButton } from "@/components/impersonate-button";
+import { DeleteClientButton } from "@/components/delete-client-button";
 
 const PERIOD_LABELS: Record<string, string> = {
   DAILY: "Daily",
@@ -636,6 +637,13 @@ export default async function ClientDetailPage({
           </button>
         </form>
       </section>
+
+      {isAdmin && (
+        <section>
+          <h2 className="mb-3 text-lg text-ink">Danger zone</h2>
+          <DeleteClientButton clientId={client.id} clientName={client.name} />
+        </section>
+      )}
     </div>
   );
 }

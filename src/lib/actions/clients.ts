@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/guards";
+import { requireStaff, requireAdmin } from "@/lib/guards";
 import { generateToken } from "@/lib/tokens";
 
 export async function createClient(formData: FormData) {
@@ -211,4 +211,25 @@ export async function deleteReport(clientId: string, reportId: string) {
   await requireStaff();
   await prisma.report.delete({ where: { id: reportId } });
   revalidatePath(`/admin/clients/${clientId}`);
+}
+
+/**
+ * Permanently removes a client and everything tied to it (portal users,
+ * stats, checklist, links, reports, resources, updates, invites, messages,
+ * invoices, milestones, tickets, bookings). Tasks linked to this client are
+ * kept but unlinked, since they may still matter as internal work history.
+ * Admin-only — there is no undo.
+ */
+export async function deleteClient(clientId: string) {
+  await requireAdmin();
+
+  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!client) {
+    throw new Error("Client not found");
+  }
+
+  await prisma.client.delete({ where: { id: clientId } });
+
+  revalidatePath("/admin/clients");
+  redirect("/admin/clients");
 }
