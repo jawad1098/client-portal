@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0F1B2D;
+  --paper: #F7F5F0;
+  --green: #10B981;
+  --green-dark: #0E9F70;
+  --slate: #5C6B7A;
+  --mist: #A9BCC9;
+  --line: rgba(15, 27, 45, 0.12);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-green: var(--green);
+  --color-green-dark: var(--green-dark);
+  --color-slate: var(--slate);
+  --color-mist: var(--mist);
+  --color-line: var(--line);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.brand-dot {
+  color: var(--green);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.stat-num {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 1.9rem;
+  color: var(--ink);
+}
+
+.stat-num em {
+  font-style: normal;
+  color: var(--green-dark);
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--slate);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+ul.checklist {
+  list-style: none;
+}
+
+ul.checklist li {
+  padding: 11px 0 11px 34px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  font-size: 0.95rem;
+}
+
+ul.checklist li:last-child {
+  border-bottom: none;
+}
+
+ul.checklist li::before {
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+li.done::before {
+  content: "\2713";
+  background: var(--green);
+  color: #fff;
+}
+
+li.todo::before {
+  content: "";
+  border: 2px solid var(--mist);
+}
+
+li.todo {
+  color: var(--slate);
+}
+
+.link-card {
+  display: block;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: border-color 0.15s;
+}
+
+.link-card:hover {
+  border-color: var(--green);
+}
+
+.link-card .go {
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.status-pill {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 500;
+  font-size: 0.85rem;
+  background: rgba(16, 185, 129, 0.16);
+  color: #7ce3bd;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  padding: 8px 16px;
+  border-radius: 99px;
+  display: inline-block;
+}

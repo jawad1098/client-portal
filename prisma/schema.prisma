@@ -1,0 +1,362 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  ADMIN
+  TEAM
+  CLIENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum ResourceAudience {
+  CLIENT
+  TEAM
+}
+
+enum UpdatePeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum AttachmentKind {
+  INSTRUCTION
+  PROOF
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMMENT
+  MESSAGE
+  UPDATE_POSTED
+  INVOICE_SENT
+  TICKET_REPLY
+  TICKET_NEW
+  BOOKING_CREATED
+  BOOKING_CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String?
+  role          Role      @default(CLIENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Set when role = CLIENT: which client company this user belongs to / manages
+  clientId      String?
+  client        Client?   @relation(fields: [clientId], references: [id])
+
+  assignedTasks Task[]    @relation("AssignedTo")
+  createdTasks  Task[]    @relation("CreatedBy")
+  comments      TaskComment[]
+  invitesSent   Invite[]  @relation("InvitedBy")
+  resources     Resource[]
+  updatesPosted Update[]
+  attachments   TaskAttachment[]
+
+  messagesSent      Message[]
+  notifications     Notification[]
+  invoicesCreated   Invoice[]      @relation("InvoiceCreatedBy")
+  ticketsCreated    Ticket[]       @relation("TicketCreatedBy")
+  ticketReplies     TicketReply[]
+}
+
+model Client {
+  id          String    @id @default(cuid())
+  name        String
+  status      String    @default("Active") // Active, Onboarding, Paused
+  logoUrl     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  users       User[]
+  tasks       Task[]
+  stats       ClientStat[]
+  checklist   ChecklistItem[]
+  links       ClientLink[]
+  reports     Report[]
+  invites     Invite[]
+  resources   Resource[]
+  updates     Update[]
+
+  messages    Message[]
+  invoices    Invoice[]
+  milestones  Milestone[]
+  tickets     Ticket[]
+  bookings    Booking[]
+}
+
+model ClientStat {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  label     String
+  value     String
+  month     String
+  order     Int      @default(0)
+}
+
+model ChecklistItem {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  label     String
+  done      Boolean  @default(false)
+  order     Int      @default(0)
+}
+
+model ClientLink {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  note      String?
+  order     Int      @default(0)
+}
+
+model Report {
+  id         String    @id @default(cuid())
+  clientId   String
+  client     Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  month      String
+  headline   String
+  url        String?
+  createdAt  DateTime  @default(now())
+  approved   Boolean?
+  approvedAt DateTime?
+}
+
+model Task {
+  id            String     @id @default(cuid())
+  title         String
+  description   String?
+  status        TaskStatus @default(TODO)
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  clientId      String?
+  client        Client?    @relation(fields: [clientId], references: [id])
+
+  assigneeId    String?
+  assignee      User?      @relation("AssignedTo", fields: [assigneeId], references: [id])
+
+  createdById   String
+  createdBy     User       @relation("CreatedBy", fields: [createdById], references: [id])
+
+  comments      TaskComment[]
+  attachments   TaskAttachment[]
+}
+
+model TaskAttachment {
+  id          String         @id @default(cuid())
+  taskId      String
+  task        Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  url         String
+  label       String
+  kind        AttachmentKind
+  addedById   String
+  addedBy     User           @relation(fields: [addedById], references: [id])
+  createdAt   DateTime       @default(now())
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Invite {
+  id          String       @id @default(cuid())
+  email       String
+  name        String
+  role        Role
+  token       String       @unique
+  status      InviteStatus @default(PENDING)
+  clientId    String?
+  client      Client?      @relation(fields: [clientId], references: [id])
+  invitedById String
+  invitedBy   User         @relation("InvitedBy", fields: [invitedById], references: [id])
+  createdAt   DateTime     @default(now())
+  expiresAt   DateTime
+}
+
+model Resource {
+  id          String           @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  filename    String?
+  size        Int?
+  clientId    String?
+  client      Client?          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  audience    ResourceAudience
+  order       Int              @default(0)
+  createdById String
+  createdBy   User             @relation(fields: [createdById], references: [id])
+  createdAt   DateTime         @default(now())
+}
+
+model Update {
+  id          String       @id @default(cuid())
+  clientId    String
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  period      UpdatePeriod
+  title       String
+  body        String
+  createdById String
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdAt   DateTime     @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  link      String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  description String
+  amount      Int
+  currency    String        @default("GBP")
+  status      InvoiceStatus @default(DRAFT)
+  isRecurring Boolean       @default(false)
+  dueDate     DateTime?
+  paymentUrl  String?
+  createdById String
+  createdBy   User          @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime      @default(now())
+  paidAt      DateTime?
+}
+
+model Milestone {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title     String
+  date      DateTime
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  clientId    String
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title       String
+  body        String
+  status      TicketStatus @default(OPEN)
+  createdById String
+  createdBy   User         @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  replies     TicketReply[]
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model AvailabilityRule {
+  id          String   @id @default(cuid())
+  weekday     Int      // 0 = Sunday .. 6 = Saturday
+  startMinute Int      // minutes after midnight
+  endMinute   Int      // minutes after midnight
+  slotMinutes Int      @default(30)
+  createdAt   DateTime @default(now())
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  clientId  String
+  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  startsAt  DateTime
+  endsAt    DateTime
+  title     String        @default("Call with builtbyjawad")
+  notes     String?
+  status    BookingStatus @default(CONFIRMED)
+  createdAt DateTime      @default(now())
+}
+
+/// One-time, short-lived token an admin uses to switch the active session to
+/// another user's view (or back to their own) for testing. Consumed on use.
+model ImpersonationGrant {
+  id           String   @id @default(cuid())
+  token        String   @unique
+  adminId      String
+  targetUserId String
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+}
