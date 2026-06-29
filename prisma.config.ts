@@ -10,6 +10,8 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations run over the session-mode pooler (supports DDL); the app's
+    // own PrismaClient uses DATABASE_URL (transaction-mode pooler) instead.
+    url: process.env["DIRECT_URL"],
   },
 });
