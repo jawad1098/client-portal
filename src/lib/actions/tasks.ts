@@ -160,6 +160,99 @@ export async function deleteTask(taskId: string) {
   revalidatePath("/admin/tasks");
 }
 
+export type BulkTaskRow = {
+  title: string;
+  description?: string;
+  dueDate?: string;
+  assigneeId?: string;
+  clientId?: string;
+  status?: "TODO" | "IN_PROGRESS" | "DONE";
+};
+
+export async function createTasksBulk(rows: BulkTaskRow[]) {
+  const session = await requireStaff();
+
+  const validRows = rows.filter((r) => r.title.trim());
+  if (validRows.length === 0) throw new Error("At least one task title is required");
+
+  const created = await prisma.$transaction(
+    validRows.map((r) =>
+      prisma.task.create({
+        data: {
+          title: r.title.trim(),
+          description: r.description?.trim() || null,
+          dueDate: r.dueDate ? new Date(r.dueDate) : null,
+          assigneeId: r.assigneeId || null,
+          clientId: r.clientId || null,
+          status: r.status || "TODO",
+          createdById: session.user.id,
+        },
+      })
+    )
+  );
+
+  for (const task of created) {
+    if (task.assigneeId && task.assigneeId !== session.user.id) {
+      await createNotification(
+        task.assigneeId,
+        "TASK_ASSIGNED",
+        "New task assigned to you",
+        task.title,
+        `/admin/tasks/${task.id}`
+      );
+    }
+  }
+
+  revalidatePath("/admin/tasks");
+}
+
+export async function updateTaskField(
+  taskId: string,
+  field: "title" | "description" | "dueDate" | "assigneeId" | "clientId" | "status",
+  value: string
+) {
+  const session = await requireStaff();
+
+  const task = await prisma.task.findUnique({ where: { id: taskId } });
+  if (!task) throw new Error("Task not found");
+
+  // Team members can only edit tasks assigned to them
+  if (session.user.role === "TEAM" && task.assigneeId !== session.user.id) {
+    throw new Error("Not authorized");
+  }
+
+  let data: Record<string, unknown> = {};
+  if (field === "title") {
+    if (!value.trim()) throw new Error("Title cannot be empty");
+    data.title = value.trim();
+  } else if (field === "description") {
+    data.description = value.trim() || null;
+  } else if (field === "dueDate") {
+    data.dueDate = value ? new Date(value) : null;
+  } else if (field === "assigneeId") {
+    data.assigneeId = value || null;
+  } else if (field === "clientId") {
+    data.clientId = value || null;
+  } else if (field === "status") {
+    data.status = value;
+  }
+
+  await prisma.task.update({ where: { id: taskId }, data });
+
+  if (field === "assigneeId" && value && value !== task.assigneeId) {
+    await createNotification(
+      value,
+      "TASK_ASSIGNED",
+      "Task assigned to you",
+      task.title,
+      `/admin/tasks/${taskId}`
+    );
+  }
+
+  revalidatePath("/admin/tasks");
+  revalidatePath(`/admin/tasks/${taskId}`);
+}
+
 export async function addTaskAttachment(
   taskId: string,
   kind: "INSTRUCTION" | "PROOF",

@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { createTask, deleteTask } from "@/lib/actions/tasks";
+import { deleteTask } from "@/lib/actions/tasks";
 import { TaskStatusSelect } from "./task-status-select";
-import { TaskAttachmentFields } from "./task-attachment-fields";
+import { BulkTaskForm } from "@/components/bulk-task-form";
+import { InlineTaskTitle } from "@/components/inline-task-edit";
 
 const COLUMNS = [
   { status: "TODO" as const, label: "To do" },
@@ -14,9 +14,11 @@ const COLUMNS = [
 export default async function TasksPage() {
   const session = await auth();
   const isAdmin = session?.user.role === "ADMIN";
+  const userId = session?.user.id;
 
   const [tasks, team, clients] = await Promise.all([
     prisma.task.findMany({
+      where: isAdmin ? undefined : { assigneeId: userId },
       orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
       include: { assignee: true, client: true, attachments: true },
     }),
@@ -29,48 +31,13 @@ export default async function TasksPage() {
       <h1 className="text-2xl text-ink">
         Tasks<span className="brand-dot">.</span>
       </h1>
-      <p className="mb-6 text-sm text-slate">{tasks.length} total across all clients</p>
+      <p className="mb-6 text-sm text-slate">
+        {isAdmin
+          ? `${tasks.length} total across all clients`
+          : `${tasks.length} task${tasks.length === 1 ? "" : "s"} assigned to you`}
+      </p>
 
-      <form action={createTask} className="card mb-8 flex flex-wrap items-end gap-3 p-4">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink">Title</label>
-          <input name="title" required className="w-56 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink">Description</label>
-          <input name="description" className="w-64 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink">Due date</label>
-          <input name="dueDate" type="date" className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink">Assignee</label>
-          <select name="assigneeId" className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green">
-            <option value="">Unassigned</option>
-            {team.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink">Client</label>
-          <select name="clientId" className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green">
-            <option value="">No client</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <TaskAttachmentFields />
-        <button type="submit" className="rounded-lg bg-green px-4 py-2 text-sm font-semibold text-white hover:bg-green-dark">
-          Add task
-        </button>
-      </form>
+      {isAdmin && <BulkTaskForm team={team} clients={clients} />}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {COLUMNS.map((column) => (
@@ -87,9 +54,9 @@ export default async function TasksPage() {
                   return (
                     <div key={task.id} className="card p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <Link href={`/admin/tasks/${task.id}`} className="font-medium text-ink hover:text-green-dark">
-                          {task.title}
-                        </Link>
+                        <div className="flex-1 min-w-0">
+                          <InlineTaskTitle taskId={task.id} title={task.title} />
+                        </div>
                         {isAdmin && (
                           <form action={deleteTask.bind(null, task.id)}>
                             <button type="submit" className="text-xs text-slate hover:text-red-600">
