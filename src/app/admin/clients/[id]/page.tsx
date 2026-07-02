@@ -14,7 +14,7 @@ import {
   deleteReport,
   inviteClientUser,
 } from "@/lib/actions/clients";
-import { addClientResource, deleteResource } from "@/lib/actions/resources";
+import { deleteResource } from "@/lib/actions/resources";
 import { EditResourceButton } from "@/components/edit-resource-button";
 import { addUpdate, deleteUpdate } from "@/lib/actions/updates";
 import { sendMessage } from "@/lib/actions/messages";
@@ -25,6 +25,7 @@ import { InviteLink } from "./invite-link";
 import { MilestoneToggle } from "./milestone-toggle";
 import { InvoiceStatusButtons } from "./invoice-status-buttons";
 import { ImpersonateButton } from "@/components/impersonate-button";
+import { AddResourceForm } from "@/components/add-resource-form";
 import { DeleteClientButton } from "@/components/delete-client-button";
 
 const PERIOD_LABELS: Record<string, string> = {
@@ -90,8 +91,7 @@ export default async function ClientDetailPage({
   const addLinkWithId = addClientLink.bind(null, client.id);
   const addReportWithId = addReport.bind(null, client.id);
   const inviteUserWithId = inviteClientUser.bind(null, client.id);
-  const addResourceWithId = addClientResource.bind(null, client.id);
-  const addUpdateWithId = addUpdate.bind(null, client.id);
+const addUpdateWithId = addUpdate.bind(null, client.id);
   const sendMessageWithId = sendMessage.bind(null, client.id);
   const addInvoiceWithId = addInvoice.bind(null, client.id);
   const addMilestoneWithId = addMilestone.bind(null, client.id);
@@ -528,27 +528,7 @@ export default async function ClientDetailPage({
           ))}
           {client.resources.length === 0 && <p className="text-sm text-slate">No resources yet.</p>}
         </div>
-        <form action={addResourceWithId} className="card flex flex-wrap items-end gap-3 p-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Title</label>
-            <input name="title" required className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">URL (or upload a file below)</label>
-            <input name="url" type="url" className="w-56 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Or upload a file (max 10MB)</label>
-            <input name="file" type="file" className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Description</label>
-            <input name="description" className="w-56 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <button type="submit" className="rounded-lg bg-green px-4 py-2 text-sm font-semibold text-white hover:bg-green-dark">
-            Add resource
-          </button>
-        </form>
+        <AddResourceForm clientId={client.id} />
       </section>
 
       {/* Updates */}

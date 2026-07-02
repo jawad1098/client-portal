@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { addTeamResource, deleteResource } from "@/lib/actions/resources";
+import { deleteResource } from "@/lib/actions/resources";
 import { EditResourceButton } from "@/components/edit-resource-button";
+import { AddResourceForm } from "@/components/add-resource-form";
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -56,29 +57,7 @@ export default async function AdminResourcesPage() {
         {resources.length === 0 && <p className="text-sm text-slate">No resources yet.</p>}
       </div>
 
-      {isAdmin && (
-        <form action={addTeamResource} className="card flex flex-wrap items-end gap-3 p-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Title</label>
-            <input name="title" required className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">URL (or upload a file below)</label>
-            <input name="url" type="url" className="w-56 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Or upload a file (max 10MB)</label>
-            <input name="file" type="file" className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Description</label>
-            <input name="description" className="w-56 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
-          </div>
-          <button type="submit" className="rounded-lg bg-green px-4 py-2 text-sm font-semibold text-white hover:bg-green-dark">
-            Add resource
-          </button>
-        </form>
-      )}
+      {isAdmin && <AddResourceForm />}
     </div>
   );
 }
