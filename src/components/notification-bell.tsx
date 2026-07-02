@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { getNotifications, markNotificationsRead } from "@/lib/actions/notifications";
 
@@ -30,6 +31,8 @@ export function NotificationBell({ variant = "dark" }: { variant?: "dark" | "lig
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isPending, startTransition] = useTransition();
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   async function refresh() {
     const result = await getNotifications();
@@ -39,45 +42,42 @@ export function NotificationBell({ variant = "dark" }: { variant?: "dark" | "lig
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
       const result = await getNotifications();
       if (cancelled) return;
       setNotifications(result.notifications as NotificationItem[]);
       setUnreadCount(result.unreadCount);
     }
-
     load();
     const interval = setInterval(load, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
+    return () => { cancelled = true; clearInterval(interval); };
   }, []);
+
+  // Reposition panel whenever it opens
+  useEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const panelWidth = 320;
+    const left = Math.min(rect.left, window.innerWidth - panelWidth - 8);
+    setPanelStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: Math.max(8, left),
+      width: panelWidth,
+      zIndex: 9999,
+    });
+  }, [open]);
 
   const textClass = variant === "dark" ? "text-paper/90" : "text-ink";
 
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={`relative rounded-lg px-2 py-2 text-sm ${textClass} transition hover:bg-white/10`}
-        aria-label="Notifications"
-      >
-        🔔
-        {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-green px-1 text-[0.6rem] font-bold text-white">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </button>
-
-      {open && (
+  const panel = open
+    ? createPortal(
         <>
-          {/* backdrop to close on outside click */}
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="fixed left-4 top-14 z-50 w-80 rounded-xl border border-line bg-white text-ink shadow-xl md:absolute md:left-auto md:right-0 md:top-auto md:mt-2">
+          <div className="fixed inset-0" style={{ zIndex: 9998 }} onClick={() => setOpen(false)} />
+          <div
+            style={panelStyle}
+            className="rounded-xl border border-line bg-white text-ink shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <span className="text-sm font-semibold">Notifications</span>
               <button
@@ -109,16 +109,40 @@ export function NotificationBell({ variant = "dark" }: { variant?: "dark" | "lig
                 >
                   <div className="flex items-center justify-between gap-2">
                     <b className="font-display text-ink">{notification.title}</b>
-                    {!notification.read && <span className="h-2 w-2 flex-none rounded-full bg-green" />}
+                    {!notification.read && (
+                      <span className="h-2 w-2 flex-none rounded-full bg-green" />
+                    )}
                   </div>
                   <p className="mt-1 text-xs text-slate">{notification.body}</p>
-                  <p className="mt-1 text-[0.65rem] text-mist">{relativeTime(notification.createdAt)}</p>
+                  <p className="mt-1 text-[0.65rem] text-mist">
+                    {relativeTime(notification.createdAt)}
+                  </p>
                 </Link>
               ))}
             </div>
           </div>
-        </>
-      )}
+        </>,
+        document.body
+      )
+    : null;
+
+  return (
+    <div className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`relative rounded-lg px-2 py-2 text-sm ${textClass} transition hover:bg-white/10`}
+        aria-label="Notifications"
+      >
+        🔔
+        {unreadCount > 0 && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-green px-1 text-[0.6rem] font-bold text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+      {panel}
     </div>
   );
 }
