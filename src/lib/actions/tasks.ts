@@ -175,32 +175,31 @@ export async function createTasksBulk(rows: BulkTaskRow[]) {
   const validRows = rows.filter((r) => r.title.trim());
   if (validRows.length === 0) throw new Error("At least one task title is required");
 
-  const created = await prisma.$transaction(
-    validRows.map((r) =>
-      prisma.task.create({
-        data: {
-          title: r.title.trim(),
-          description: r.description?.trim() || null,
-          dueDate: r.dueDate ? new Date(r.dueDate) : null,
-          assigneeId: r.assigneeId || null,
-          clientId: r.clientId || null,
-          status: r.status || "TODO",
-          createdById: session.user.id,
-        },
-      })
-    )
-  );
+  await prisma.task.createMany({
+    data: validRows.map((r) => ({
+      title: r.title.trim(),
+      description: r.description.trim() || null,
+      dueDate: r.dueDate ? new Date(r.dueDate) : null,
+      assigneeId: r.assigneeId || null,
+      clientId: r.clientId || null,
+      status: r.status || "TODO",
+      createdById: session.user.id,
+    })),
+  });
 
-  for (const task of created) {
-    if (task.assigneeId && task.assigneeId !== session.user.id) {
-      await createNotification(
-        task.assigneeId,
-        "TASK_ASSIGNED",
-        "New task assigned to you",
-        task.title,
-        `/admin/tasks/${task.id}`
-      );
-    }
+  // Send notifications to unique assignees (excluding the creator)
+  const assigneeIds = [...new Set(
+    validRows.map((r) => r.assigneeId).filter((id): id is string => !!id && id !== session.user.id)
+  )];
+  for (const assigneeId of assigneeIds) {
+    const count = validRows.filter((r) => r.assigneeId === assigneeId).length;
+    await createNotification(
+      assigneeId,
+      "TASK_ASSIGNED",
+      `${count} new task${count === 1 ? "" : "s"} assigned to you`,
+      validRows.filter((r) => r.assigneeId === assigneeId).map((r) => r.title.trim()).join(", ").slice(0, 140),
+      `/admin/tasks`
+    );
   }
 
   revalidatePath("/admin/tasks");
