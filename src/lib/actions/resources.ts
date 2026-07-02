@@ -95,6 +95,54 @@ export async function addTeamResource(formData: FormData) {
   revalidatePath("/admin/resources");
 }
 
+export async function updateResource(resourceId: string, formData: FormData) {
+  await requireStaff();
+
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+
+  if (!title) {
+    throw new Error("Title is required");
+  }
+
+  const existing = await prisma.resource.findUnique({ where: { id: resourceId } });
+  if (!existing) throw new Error("Resource not found");
+
+  // If a new file is uploaded, replace the stored URL/filename/size
+  const file = formData.get("file");
+  let updateData: {
+    title: string;
+    description: string | null;
+    url?: string;
+    filename?: string | null;
+    size?: number | null;
+  } = { title, description: description || null };
+
+  if (file instanceof File && file.size > 0) {
+    try {
+      const saved = await saveUploadedFile(file);
+      updateData = { ...updateData, url: saved.url, filename: saved.filename, size: saved.size };
+    } catch (error) {
+      if (error instanceof UploadError) throw new Error(error.message);
+      throw error;
+    }
+  } else {
+    const url = String(formData.get("url") || "").trim();
+    if (url) {
+      updateData = { ...updateData, url, filename: null, size: null };
+    }
+  }
+
+  await prisma.resource.update({ where: { id: resourceId }, data: updateData });
+
+  if (existing.clientId) {
+    revalidatePath(`/admin/clients/${existing.clientId}`);
+    revalidatePath("/portal/resources");
+  } else {
+    revalidatePath("/admin/resources");
+  }
+}
+
 export async function deleteResource(resourceId: string) {
   await requireAdmin();
 

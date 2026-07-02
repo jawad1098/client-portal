@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { addTeamResource, deleteResource } from "@/lib/actions/resources";
+import { EditResourceButton } from "@/components/edit-resource-button";
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -40,11 +41,14 @@ export default async function AdminResourcesPage() {
                 {resource.filename ? "Download" : "Open"} &rarr;
               </a>
               {isAdmin && (
-                <form action={deleteResource.bind(null, resource.id)}>
-                  <button type="submit" className="text-xs text-slate hover:text-red-600">
-                    Remove
-                  </button>
-                </form>
+                <div className="flex items-center gap-3">
+                  <EditResourceButton resource={resource} />
+                  <form action={deleteResource.bind(null, resource.id)}>
+                    <button type="submit" className="text-xs text-slate hover:text-red-600">
+                      Remove
+                    </button>
+                  </form>
+                </div>
               )}
             </div>
           </div>

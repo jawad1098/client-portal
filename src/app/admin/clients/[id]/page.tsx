@@ -15,6 +15,7 @@ import {
   inviteClientUser,
 } from "@/lib/actions/clients";
 import { addClientResource, deleteResource } from "@/lib/actions/resources";
+import { EditResourceButton } from "@/components/edit-resource-button";
 import { addUpdate, deleteUpdate } from "@/lib/actions/updates";
 import { sendMessage } from "@/lib/actions/messages";
 import { addInvoice, deleteInvoice, updateInvoicePaymentUrl } from "@/lib/actions/invoices";
@@ -513,11 +514,14 @@ export default async function ClientDetailPage({
                   {resource.filename ? "Download" : "Open"} &rarr;
                 </a>
                 {isAdmin && (
-                  <form action={deleteResource.bind(null, resource.id)}>
-                    <button type="submit" className="text-xs text-slate hover:text-red-600">
-                      Remove
-                    </button>
-                  </form>
+                  <div className="flex items-center gap-3">
+                    <EditResourceButton resource={resource} />
+                    <form action={deleteResource.bind(null, resource.id)}>
+                      <button type="submit" className="text-xs text-slate hover:text-red-600">
+                        Remove
+                      </button>
+                    </form>
+                  </div>
                 )}
               </div>
             </div>
