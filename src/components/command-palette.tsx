@@ -127,8 +127,8 @@ export function CommandPalette({ role, switchTargets, triggerVariant = "sidebar"
     { label: "Resources", items: results.filter((r) => r.type === "Resource") },
   ].filter((g) => g.items.length > 0);
 
-  const hasSwitchResults = q.length > 0 && (filteredClients.length > 0 || filteredTeam.length > 0);
-  const hasAnyResults = groups.length > 0 || hasSwitchResults;
+  const hasSwitchTargets = canSwitch && (filteredClients.length > 0 || filteredTeam.length > 0);
+  const hasAnyResults = groups.length > 0 || hasSwitchTargets;
 
   return (
     <>
@@ -164,14 +164,14 @@ export function CommandPalette({ role, switchTargets, triggerVariant = "sidebar"
           ref={inputRef}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder={role === "CLIENT" ? "Search resources, tickets..." : "Search clients, tasks, tickets, team..."}
+          placeholder={role === "CLIENT" ? "Search resources, tickets..." : "Switch view or search clients, tasks, tickets..."}
           className="w-full border-b border-line px-4 py-3 text-sm text-ink outline-none"
         />
 
         {error && <p className="px-4 pt-3 text-xs text-red-600">{error}</p>}
 
         <div className="max-h-[60vh] overflow-y-auto p-2">
-          {q.length === 0 && (
+          {q.length === 0 && !hasSwitchTargets && (
             <p className="px-2 py-4 text-center text-sm text-slate">Start typing to search.</p>
           )}
 
@@ -200,7 +200,7 @@ export function CommandPalette({ role, switchTargets, triggerVariant = "sidebar"
             </div>
           ))}
 
-          {hasSwitchResults && (
+          {hasSwitchTargets && (
             <div className="mb-2">
               <p className="mb-1 px-2 text-[0.65rem] font-semibold uppercase tracking-wide text-slate">
                 Switch to...
