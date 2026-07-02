@@ -9,9 +9,8 @@ const STATUS_LABELS: Record<string, string> = {
   OVERDUE: "Overdue",
 };
 
-function formatAmount(amount: number, currency: string) {
-  const symbol = currency === "GBP" ? "£" : currency + " ";
-  return `${symbol}${(amount / 100).toFixed(2)}`;
+function formatAmount(amount: number) {
+  return `$${(amount / 100).toFixed(2)}`;
 }
 
 export default async function PortalBillingPage() {
@@ -53,7 +52,7 @@ export default async function PortalBillingPage() {
                   {invoice.isRecurring && <span className="ml-2 text-xs text-mist">(recurring)</span>}
                 </td>
                 <td className="px-4 py-3 font-semibold text-ink">
-                  {formatAmount(invoice.amount, invoice.currency)}
+                  {formatAmount(invoice.amount)}
                 </td>
                 <td className="px-4 py-3 text-slate">
                   {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString("en-GB") : "—"}

@@ -20,21 +20,21 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
 
   const [clients, tasks, tickets, team] = await Promise.all([
     prisma.client.findMany({
-      where: { name: { contains: q } },
+      where: { name: { contains: q, mode: "insensitive" } },
       take: 5,
     }),
     prisma.task.findMany({
-      where: { title: { contains: q } },
+      where: { title: { contains: q, mode: "insensitive" } },
       take: 5,
       include: { client: true },
     }),
     prisma.ticket.findMany({
-      where: { title: { contains: q } },
+      where: { title: { contains: q, mode: "insensitive" } },
       take: 5,
       include: { client: true },
     }),
     prisma.user.findMany({
-      where: { role: "TEAM", name: { contains: q } },
+      where: { role: "TEAM", name: { contains: q, mode: "insensitive" } },
       take: 5,
     }),
   ]);

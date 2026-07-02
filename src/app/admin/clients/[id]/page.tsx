@@ -41,9 +41,8 @@ const INVOICE_STATUS_LABELS: Record<string, string> = {
   OVERDUE: "Overdue",
 };
 
-function formatAmount(amount: number, currency: string) {
-  const symbol = currency === "GBP" ? "£" : currency + " ";
-  return `${symbol}${(amount / 100).toFixed(2)}`;
+function formatAmount(amount: number) {
+  return `$${(amount / 100).toFixed(2)}`;
 }
 
 function formatSize(bytes: number) {
@@ -351,8 +350,8 @@ const addUpdateWithId = addUpdate.bind(null, client.id);
         </form>
       </section>
 
-      {/* Billing */}
-      <section>
+      {/* Billing — admin only */}
+      {isAdmin && <section>
         <h2 className="mb-3 text-lg text-ink">Billing</h2>
         <div className="card mb-4 overflow-hidden">
           <table className="w-full text-sm">
@@ -370,7 +369,7 @@ const addUpdateWithId = addUpdate.bind(null, client.id);
               {client.invoices.map((invoice) => (
                 <tr key={invoice.id} className="border-t border-line">
                   <td className="px-4 py-3">{invoice.description}</td>
-                  <td className="px-4 py-3 font-semibold text-ink">{formatAmount(invoice.amount, invoice.currency)}</td>
+                  <td className="px-4 py-3 font-semibold text-ink">{formatAmount(invoice.amount)}</td>
                   <td className="px-4 py-3 text-slate">
                     {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString("en-GB") : "—"}
                   </td>
@@ -421,7 +420,7 @@ const addUpdateWithId = addUpdate.bind(null, client.id);
             <input name="description" required className="w-56 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-ink">Amount (£)</label>
+            <label className="mb-1 block text-xs font-medium text-ink">Amount ($)</label>
             <input name="amount" required type="number" step="0.01" min="0.01" className="w-28 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green" />
           </div>
           <div>
@@ -445,7 +444,7 @@ const addUpdateWithId = addUpdate.bind(null, client.id);
             Add invoice
           </button>
         </form>
-      </section>
+      </section>}
 
       {/* Milestones */}
       <section>

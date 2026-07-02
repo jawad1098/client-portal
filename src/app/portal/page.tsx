@@ -10,9 +10,8 @@ const PERIOD_LABELS: Record<string, string> = {
   MONTHLY: "Monthly",
 };
 
-function formatAmount(amount: number, currency: string) {
-  const symbol = currency === "GBP" ? "£" : currency + " ";
-  return `${symbol}${(amount / 100).toFixed(2)}`;
+function formatAmount(amount: number) {
+  return `$${(amount / 100).toFixed(2)}`;
 }
 
 export default async function PortalPage() {
@@ -84,7 +83,7 @@ export default async function PortalPage() {
             <div className="stat-label">Open support request{openTicketCount === 1 ? "" : "s"}</div>
           </div>
           <div className="card p-4">
-            <div className="stat-num">{outstandingTotal > 0 ? formatAmount(outstandingTotal, "GBP") : "£0.00"}</div>
+            <div className="stat-num">{outstandingTotal > 0 ? formatAmount(outstandingTotal) : "$0.00"}</div>
             <div className="stat-label">Outstanding invoices</div>
           </div>
         </div>

@@ -61,7 +61,7 @@ export async function markInvoiceStatus(
   });
 
   if (status === "SENT") {
-    const formatted = `£${(invoice.amount / 100).toFixed(2)}`;
+    const formatted = `$${(invoice.amount / 100).toFixed(2)}`;
     await notifyClientUsers(
       invoice.clientId,
       "INVOICE_SENT",
