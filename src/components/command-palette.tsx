@@ -77,9 +77,9 @@ export function CommandPalette({ role, switchTargets, triggerVariant = "sidebar"
     let cancelled = false;
     const timeout = setTimeout(() => {
       const search = role === "CLIENT" ? clientSearch : globalSearch;
-      search(q).then((res) => {
-        if (!cancelled) setResults(res);
-      });
+      search(q)
+        .then((res) => { if (!cancelled) setResults(res); })
+        .catch(() => { if (!cancelled) setError("Search failed. Please try again."); });
     }, 150);
     return () => {
       cancelled = true;

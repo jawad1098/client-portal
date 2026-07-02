@@ -38,11 +38,16 @@ export default async function AdminLayout({
   let switcherTeam: { userId: string; label: string; sublabel: string; role: "TEAM" }[] = [];
 
   if (canSwitch) {
-    const [clientUsers, teamUsers] = await Promise.all([
-      prisma.user.findMany({
-        where: { role: "CLIENT" },
-        include: { client: true },
+    const [allClients, teamUsers] = await Promise.all([
+      prisma.client.findMany({
         orderBy: { name: "asc" },
+        include: {
+          users: {
+            where: { role: "CLIENT" },
+            orderBy: { name: "asc" },
+            take: 1,
+          },
+        },
       }),
       prisma.user.findMany({
         where: { role: "TEAM" },
@@ -50,12 +55,14 @@ export default async function AdminLayout({
       }),
     ]);
 
-    switcherClients = clientUsers.map((u) => ({
-      userId: u.id,
-      label: u.client?.name ?? u.name,
-      sublabel: `${u.name} · ${u.email}`,
-      role: "CLIENT" as const,
-    }));
+    switcherClients = allClients
+      .filter((c) => c.users.length > 0)
+      .map((c) => ({
+        userId: c.users[0].id,
+        label: c.name,
+        sublabel: `${c.users[0].name} · ${c.users[0].email}`,
+        role: "CLIENT" as const,
+      }));
     switcherTeam = teamUsers.map((u) => ({
       userId: u.id,
       label: u.name,

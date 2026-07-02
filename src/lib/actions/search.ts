@@ -82,11 +82,11 @@ export async function clientSearch(query: string): Promise<SearchResult[]> {
 
   const [resources, tickets] = await Promise.all([
     prisma.resource.findMany({
-      where: { clientId: session.user.clientId, audience: "CLIENT", title: { contains: q } },
+      where: { clientId: session.user.clientId, audience: "CLIENT", title: { contains: q, mode: "insensitive" } },
       take: 5,
     }),
     prisma.ticket.findMany({
-      where: { clientId: session.user.clientId!, title: { contains: q } },
+      where: { clientId: session.user.clientId!, title: { contains: q, mode: "insensitive" } },
       take: 5,
     }),
   ]);
