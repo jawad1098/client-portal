@@ -26,20 +26,31 @@ export default async function AdminResourcesPage() {
       </h1>
       <p className="mb-6 text-sm text-slate">SOPs, brand guides, and shared docs for the team.</p>
 
-      <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {resources.map((resource) => (
-          <div key={resource.id} className="link-card">
-            <b className="font-display block">{resource.title}</b>
-            {resource.filename ? (
-              <span className="text-sm text-slate">
-                {resource.filename} &middot; {formatSize(resource.size ?? 0)}
-              </span>
-            ) : (
-              resource.description && <span className="text-sm text-slate">{resource.description}</span>
-            )}
-            <div className="mt-2 flex items-center justify-between">
-              <a href={resource.url} target="_blank" rel="noreferrer" className="go text-sm">
-                {resource.filename ? "Download" : "Open"} &rarr;
+          <div key={resource.id} className="card flex flex-col gap-3 p-5">
+            {/* Title + meta */}
+            <div className="flex-1">
+              <p className="font-display text-base font-semibold text-ink">{resource.title}</p>
+              {resource.description && (
+                <p className="mt-1 text-sm text-slate">{resource.description}</p>
+              )}
+              {resource.filename && (
+                <p className="mt-1 text-xs text-mist">
+                  {resource.filename} &middot; {formatSize(resource.size ?? 0)}
+                </p>
+              )}
+            </div>
+
+            {/* Actions row */}
+            <div className="flex items-center justify-between border-t border-line pt-3">
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-medium text-green-dark hover:underline"
+              >
+                {resource.filename ? "Download" : "Open"} →
               </a>
               {isAdmin && (
                 <div className="flex items-center gap-3">
@@ -54,7 +65,9 @@ export default async function AdminResourcesPage() {
             </div>
           </div>
         ))}
-        {resources.length === 0 && <p className="text-sm text-slate">No resources yet.</p>}
+        {resources.length === 0 && (
+          <p className="col-span-3 text-sm text-slate">No resources yet. Add one below.</p>
+        )}
       </div>
 
       {isAdmin && <AddResourceForm />}

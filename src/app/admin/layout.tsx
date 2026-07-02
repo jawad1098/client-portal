@@ -66,45 +66,52 @@ export default async function AdminLayout({
 
   const sidebarContent = (
     <>
-      <CommandPalette
-        role={session.user.role}
-        switchTargets={canSwitch ? { clients: switcherClients, team: switcherTeam } : undefined}
-      />
-
-      <Image
-        src="/brand/builtbyjawad-wordmark-light.svg"
-        alt="builtbyjawad"
-        width={150}
-        height={24}
-      />
-      <div className="mt-1 flex items-center justify-between">
-        <p className="text-[0.7rem] uppercase tracking-wider text-mist">
-          Admin
-        </p>
+      {/* Logo + badge */}
+      <div className="flex items-center justify-between">
+        <Image
+          src="/brand/builtbyjawad-wordmark-light.svg"
+          alt="builtbyjawad"
+          width={140}
+          height={22}
+        />
         <NotificationBell variant="dark" />
       </div>
+      <p className="mt-1 text-[0.65rem] uppercase tracking-widest text-mist">
+        Admin panel
+      </p>
 
-      <nav className="mt-10 flex flex-1 flex-col gap-1">
+      {/* Search / command palette */}
+      <div className="mt-6">
+        <CommandPalette
+          role={session.user.role}
+          switchTargets={canSwitch ? { clients: switcherClients, team: switcherTeam } : undefined}
+        />
+      </div>
+
+      {/* Nav */}
+      <nav className="mt-6 flex flex-1 flex-col gap-0.5">
         {NAV_ITEMS.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-lg px-3 py-2 text-sm text-paper/90 transition hover:bg-white/10"
+            className="rounded-lg px-3 py-2 text-sm text-paper/80 transition hover:bg-white/10 hover:text-paper"
           >
             {item.label}
           </Link>
         ))}
       </nav>
 
-      <div className="mt-auto border-t border-white/10 pt-4">
-        <p className="mb-2 text-xs text-mist">
-          {session.user.name} · {session.user.role}
-        </p>
-        <Link href="/account" className="text-sm text-paper/80 underline hover:text-white">
-          Account settings
-        </Link>
-        <div className="mt-2">
-          <SignOutButton className="text-sm text-paper/80 underline hover:text-white" />
+      {/* Footer */}
+      <div className="mt-auto space-y-3 border-t border-white/10 pt-4">
+        <div>
+          <p className="text-xs font-medium text-paper/90">{session.user.name}</p>
+          <p className="text-[0.7rem] text-mist">{session.user.role}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link href="/account" className="text-xs text-paper/60 hover:text-paper">
+            Account
+          </Link>
+          <SignOutButton className="text-xs text-paper/60 hover:text-paper" />
         </div>
       </div>
     </>
