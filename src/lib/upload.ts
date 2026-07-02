@@ -17,7 +17,7 @@ async function uploadToSupabase(
   contentType: string
 ): Promise<string> {
   const supabaseUrl = process.env.SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const serviceKey = process.env.SUPABASE_ANON_KEY!;
   const objectPath = `${randomBytes(12).toString("hex")}/${filename}`;
 
   const res = await fetch(
@@ -58,7 +58,7 @@ export async function saveUploadedFile(
   const contentType = file.type || "application/octet-stream";
 
   // Production: use Supabase Storage (Vercel filesystem is read-only)
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
     const url = await uploadToSupabase(arrayBuffer, safeName, contentType);
     return { url, filename: safeName, size: file.size };
   }
