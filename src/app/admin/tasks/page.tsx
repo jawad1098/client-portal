@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { deleteTask } from "@/lib/actions/tasks";
@@ -5,6 +6,7 @@ import { TaskStatusSelect } from "./task-status-select";
 import { TaskFilters } from "./task-filters";
 import { BulkTaskForm } from "@/components/bulk-task-form";
 import { InlineTaskTitle } from "@/components/inline-task-edit";
+import { TaskProofButton } from "@/components/task-proof-button";
 
 const COLUMNS = [
   { status: "TODO" as const, label: "To do" },
@@ -139,13 +141,16 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
                         {instructionCount > 0 && (
                           <span className="rounded-full bg-paper px-2 py-1">📎 {instructionCount}</span>
                         )}
-                        {task.status === "DONE" && proofCount > 0 && (
-                          <span className="rounded-full bg-paper px-2 py-1">✅ {proofCount}</span>
+                        {proofCount > 0 && (
+                          <Link href={`/admin/tasks/${task.id}`} className="rounded-full bg-paper px-2 py-1 hover:text-green-dark">
+                            ✅ {proofCount} proof{proofCount > 1 ? "s" : ""}
+                          </Link>
                         )}
                       </div>
                       <div className="mt-3">
                         <TaskStatusSelect taskId={task.id} status={task.status} />
                       </div>
+                      <TaskProofButton taskId={task.id} />
                     </div>
                   );
                 })}
