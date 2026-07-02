@@ -74,46 +74,50 @@ export function NotificationBell({ variant = "dark" }: { variant?: "dark" | "lig
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-line bg-white text-ink shadow-xl">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <span className="text-sm font-semibold">Notifications</span>
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() =>
-                startTransition(async () => {
-                  await markNotificationsRead();
-                  await refresh();
-                })
-              }
-              className="text-xs font-semibold text-green-dark underline disabled:opacity-50"
-            >
-              Mark all read
-            </button>
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 && (
-              <p className="px-4 py-6 text-center text-sm text-slate">No notifications yet.</p>
-            )}
-            {notifications.map((notification) => (
-              <Link
-                key={notification.id}
-                href={notification.link}
-                onClick={() => setOpen(false)}
-                className={`block border-b border-line px-4 py-3 text-sm last:border-none hover:bg-paper ${
-                  notification.read ? "" : "bg-green/5"
-                }`}
+        <>
+          {/* backdrop to close on outside click */}
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="fixed left-4 top-14 z-50 w-80 rounded-xl border border-line bg-white text-ink shadow-xl md:absolute md:left-auto md:right-0 md:top-auto md:mt-2">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <span className="text-sm font-semibold">Notifications</span>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() =>
+                  startTransition(async () => {
+                    await markNotificationsRead();
+                    await refresh();
+                  })
+                }
+                className="text-xs font-semibold text-green-dark underline disabled:opacity-50"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <b className="font-display text-ink">{notification.title}</b>
-                  {!notification.read && <span className="h-2 w-2 flex-none rounded-full bg-green" />}
-                </div>
-                <p className="mt-1 text-xs text-slate">{notification.body}</p>
-                <p className="mt-1 text-[0.65rem] text-mist">{relativeTime(notification.createdAt)}</p>
-              </Link>
-            ))}
+                Mark all read
+              </button>
+            </div>
+            <div className="max-h-[70vh] overflow-y-auto">
+              {notifications.length === 0 && (
+                <p className="px-4 py-6 text-center text-sm text-slate">No notifications yet.</p>
+              )}
+              {notifications.map((notification) => (
+                <Link
+                  key={notification.id}
+                  href={notification.link}
+                  onClick={() => setOpen(false)}
+                  className={`block border-b border-line px-4 py-3 text-sm last:border-none hover:bg-paper ${
+                    notification.read ? "" : "bg-green/5"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <b className="font-display text-ink">{notification.title}</b>
+                    {!notification.read && <span className="h-2 w-2 flex-none rounded-full bg-green" />}
+                  </div>
+                  <p className="mt-1 text-xs text-slate">{notification.body}</p>
+                  <p className="mt-1 text-[0.65rem] text-mist">{relativeTime(notification.createdAt)}</p>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
