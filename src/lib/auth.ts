@@ -1,9 +1,10 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, signIn, signOut, auth: _auth } = NextAuth({
   pages: {
     signIn: "/login",
   },
@@ -112,3 +113,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+// Deduplicate auth() calls within a single render pass
+export const auth = cache(_auth);
