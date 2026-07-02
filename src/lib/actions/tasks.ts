@@ -162,11 +162,11 @@ export async function deleteTask(taskId: string) {
 
 export type BulkTaskRow = {
   title: string;
-  description?: string;
-  dueDate?: string;
-  assigneeId?: string;
-  clientId?: string;
-  status?: "TODO" | "IN_PROGRESS" | "DONE";
+  description: string;
+  dueDate: string;
+  assigneeId: string;
+  clientId: string;
+  status: "TODO" | "IN_PROGRESS" | "DONE";
 };
 
 export async function createTasksBulk(rows: BulkTaskRow[]) {
