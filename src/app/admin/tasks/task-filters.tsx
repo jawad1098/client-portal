@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 type Member = { id: string; name: string };
 type Client = { id: string; name: string };
@@ -35,26 +35,31 @@ export function TaskFilters({
   const set = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
+      if (value) params.set(key, value);
+      else params.delete(key);
       router.replace(`${pathname}?${params.toString()}`);
     },
     [router, pathname, searchParams]
   );
 
-  const clear = useCallback(() => {
-    router.replace(pathname);
-  }, [router, pathname]);
+  const clear = useCallback(() => router.replace(pathname), [router, pathname]);
 
   const status = searchParams.get("status") ?? "";
   const assigneeId = searchParams.get("assigneeId") ?? "";
   const clientId = searchParams.get("clientId") ?? "";
   const due = searchParams.get("due") ?? "";
+  const q = searchParams.get("q") ?? "";
 
-  const activeCount = [status, assigneeId, clientId, due].filter(Boolean).length;
+  // Local state for the search input so it feels instant; debounce URL update
+  const [searchInput, setSearchInput] = useState(q);
+  useEffect(() => { setSearchInput(q); }, [q]);
+
+  useEffect(() => {
+    const t = setTimeout(() => set("q", searchInput), 300);
+    return () => clearTimeout(t);
+  }, [searchInput]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const activeCount = [status, assigneeId, clientId, due, q].filter(Boolean).length;
 
   const selectClass = (active: boolean) =>
     `rounded-lg border px-3 py-1.5 text-sm outline-none cursor-pointer transition-colors ${
@@ -65,6 +70,18 @@ export function TaskFilters({
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-2">
+      {/* Search input first — primary action */}
+      <input
+        type="search"
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        placeholder="Search tasks…"
+        className={`rounded-lg border px-3 py-1.5 text-sm outline-none transition-colors focus:border-green ${
+          q ? "border-green" : "border-line"
+        }`}
+        style={{ minWidth: 180 }}
+      />
+
       <span className="text-xs font-medium uppercase tracking-wide text-slate">Filter</span>
 
       <select
@@ -125,7 +142,7 @@ export function TaskFilters({
 
       {activeCount > 0 && (
         <button
-          onClick={clear}
+          onClick={() => { setSearchInput(""); clear(); }}
           className="rounded-lg border border-line px-3 py-1.5 text-sm text-slate hover:border-red-400 hover:text-red-500"
         >
           Clear {activeCount} filter{activeCount > 1 ? "s" : ""}

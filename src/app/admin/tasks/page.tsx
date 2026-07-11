@@ -27,6 +27,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
   const filterAssigneeId = typeof params.assigneeId === "string" ? params.assigneeId : "";
   const filterClientId = typeof params.clientId === "string" ? params.clientId : "";
   const filterDue = typeof params.due === "string" ? params.due : "";
+  const filterQ = typeof params.q === "string" ? params.q.trim() : "";
 
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -47,6 +48,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
     prisma.task.findMany({
       where: {
         ...(isAdmin ? {} : { assigneeId: userId }),
+        ...(filterQ ? { title: { contains: filterQ, mode: "insensitive" as const } } : {}),
         ...(filterStatus ? { status: filterStatus as "TODO" | "IN_PROGRESS" | "DONE" } : {}),
         ...(filterAssigneeId === "__unassigned__"
           ? { assigneeId: null }
@@ -71,7 +73,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
     prisma.client.findMany({ orderBy: { name: "asc" } }),
   ]);
 
-  const activeFilters = [filterStatus, filterAssigneeId, filterClientId, filterDue].filter(Boolean).length;
+  const activeFilters = [filterStatus, filterAssigneeId, filterClientId, filterDue, filterQ].filter(Boolean).length;
 
   return (
     <div>
