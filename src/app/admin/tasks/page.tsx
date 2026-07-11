@@ -7,6 +7,7 @@ import { TaskFilters } from "./task-filters";
 import { BulkTaskForm } from "@/components/bulk-task-form";
 import { InlineTaskTitle } from "@/components/inline-task-edit";
 import { TaskProofButton } from "@/components/task-proof-button";
+import { EditTaskButton } from "@/components/edit-task-button";
 
 const COLUMNS = [
   { status: "TODO" as const, label: "To do" },
@@ -111,11 +112,14 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
                           <InlineTaskTitle taskId={task.id} title={task.title} />
                         </div>
                         {isAdmin && (
-                          <form action={deleteTask.bind(null, task.id)}>
-                            <button type="submit" className="text-xs text-slate hover:text-red-600">
-                              &times;
-                            </button>
-                          </form>
+                          <div className="flex items-center gap-2 flex-none">
+                            <EditTaskButton task={task} team={team} clients={clients} />
+                            <form action={deleteTask.bind(null, task.id)}>
+                              <button type="submit" className="text-xs text-slate hover:text-red-600">
+                                &times;
+                              </button>
+                            </form>
+                          </div>
                         )}
                       </div>
                       {task.description && (
