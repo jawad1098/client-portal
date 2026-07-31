@@ -20,8 +20,8 @@ export default async function AdminTicketsPage() {
       </h1>
       <p className="mb-6 text-sm text-slate">{tickets.length} support requests across all clients</p>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[520px] text-sm">
           <thead>
             <tr className="bg-ink text-paper">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Client</th>

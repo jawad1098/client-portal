@@ -76,10 +76,9 @@ export function TaskFilters({
         value={searchInput}
         onChange={(e) => setSearchInput(e.target.value)}
         placeholder="Search tasks…"
-        className={`rounded-lg border px-3 py-1.5 text-sm outline-none transition-colors focus:border-green ${
+        className={`w-full min-w-0 rounded-lg border px-3 py-1.5 text-sm outline-none transition-colors focus:border-green sm:w-auto sm:min-w-[180px] ${
           q ? "border-green" : "border-line"
         }`}
-        style={{ minWidth: 180 }}
       />
 
       <span className="text-xs font-medium uppercase tracking-wide text-slate">Filter</span>

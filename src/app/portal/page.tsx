@@ -213,8 +213,8 @@ export default async function PortalPage() {
         <h2 className="text-xl text-ink">
           Monthly reports<span className="brand-dot">.</span>
         </h2>
-        <div className="card mt-4 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card mt-4 overflow-x-auto">
+          <table className="w-full min-w-[480px] text-sm">
             <thead>
               <tr className="bg-ink text-paper">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Month</th>

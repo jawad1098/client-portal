@@ -33,8 +33,8 @@ export default async function PortalBillingPage() {
         <p className="mb-4 text-sm text-slate">Invoices and payment status for your account.</p>
       </div>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[560px] text-sm">
           <thead>
             <tr className="bg-ink text-paper">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Description</th>

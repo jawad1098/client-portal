@@ -45,8 +45,8 @@ export default async function ClientsPage({
         />
       </form>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="bg-ink text-paper">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Name</th>

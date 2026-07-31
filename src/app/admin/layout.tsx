@@ -136,7 +136,7 @@ export default async function AdminLayout({
         {session.user.impersonatorId && (
           <ImpersonationBanner viewingAs={`${session.user.name} (${session.user.role})`} />
         )}
-        <main className="flex-1 bg-paper px-8 py-8">{children}</main>
+        <main className="flex-1 bg-paper px-4 py-6 sm:px-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
   );

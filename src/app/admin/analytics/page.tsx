@@ -140,8 +140,8 @@ export default async function AnalyticsPage() {
       {/* Team workload */}
       <section>
         <h2 className="mb-3 text-lg text-ink">Team workload (open tasks)</h2>
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card overflow-x-auto">
+          <table className="w-full min-w-[360px] text-sm">
             <thead>
               <tr className="bg-ink text-paper">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Member</th>
@@ -189,8 +189,8 @@ export default async function AnalyticsPage() {
         <h2 className="mb-3 text-lg text-ink">
           Task completion rate <span className="text-slate">({overallRate}% overall)</span>
         </h2>
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card overflow-x-auto">
+          <table className="w-full min-w-[480px] text-sm">
             <thead>
               <tr className="bg-ink text-paper">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Client</th>

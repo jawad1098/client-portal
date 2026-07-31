@@ -260,8 +260,8 @@ const addUpdateWithId = addUpdate.bind(null, client.id);
       {/* Reports */}
       <section>
         <h2 className="mb-3 text-lg text-ink">Monthly reports</h2>
-        <div className="card mb-4 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card mb-4 overflow-x-auto">
+          <table className="w-full min-w-[480px] text-sm">
             <thead>
               <tr className="bg-ink text-paper">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Month</th>
@@ -353,8 +353,8 @@ const addUpdateWithId = addUpdate.bind(null, client.id);
       {/* Billing — admin only */}
       {isAdmin && <section>
         <h2 className="mb-3 text-lg text-ink">Billing</h2>
-        <div className="card mb-4 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card mb-4 overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="bg-ink text-paper">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Description</th>
