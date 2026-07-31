@@ -63,7 +63,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="mt-2 rounded-lg bg-green px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-dark disabled:opacity-60"
+        className="mt-2 min-h-11 rounded-lg bg-green px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-dark active:bg-green-dark disabled:opacity-60"
       >
         {isPending ? "Signing in..." : "Sign in"}
       </button>

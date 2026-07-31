@@ -101,7 +101,7 @@ export default async function AdminLayout({
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-lg px-3 py-2 text-sm text-paper/80 transition hover:bg-white/10 hover:text-paper"
+            className="flex min-h-11 items-center rounded-lg px-3 text-sm text-paper/80 transition hover:bg-white/10 hover:text-paper active:bg-white/15"
           >
             {item.label}
           </Link>

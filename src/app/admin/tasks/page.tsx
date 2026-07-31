@@ -97,10 +97,17 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
         {COLUMNS.map((column) => {
           const columnTasks = tasks.filter((t) => t.status === column.status);
           return (
-            <div key={column.status}>
-              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate">
+            <details key={column.status} className="group md:[&_summary]:pointer-events-none" open>
+              <summary className="mb-2 flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-slate [&::-webkit-details-marker]:hidden md:cursor-default">
+                <svg
+                  className="h-3 w-3 flex-none text-mist transition-transform group-open:rotate-90 md:hidden"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M6 4l8 6-8 6V4z" />
+                </svg>
                 {column.label} ({columnTasks.length})
-              </h2>
+              </summary>
               <div className="flex flex-col gap-3">
                 {columnTasks.map((task) => {
                   const instructionCount = task.attachments.filter((a) => a.kind === "INSTRUCTION").length;
@@ -164,7 +171,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
                   <p className="text-sm text-slate">Nothing here.</p>
                 )}
               </div>
-            </div>
+            </details>
           );
         })}
       </div>

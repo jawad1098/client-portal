@@ -33,6 +33,26 @@ body {
   font-family: var(--font-sans), sans-serif;
 }
 
+/* Mobile UX: iOS Safari auto-zooms on focus if a form control's font-size
+   is under 16px, and anything shorter than ~44px is hard to tap accurately.
+   Bump both on small screens only, so desktop keeps its tighter density. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  /* Primary/submit buttons only — small icon and inline text-link buttons
+     (e.g. "Edit" / "x" remove controls on cards) are left untouched so
+     they don't inflate and break tight card layouts. */
+  button[type="submit"],
+  button[class*="bg-green"] {
+    min-height: 44px;
+  }
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
