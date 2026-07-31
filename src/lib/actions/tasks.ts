@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff, requireAdmin } from "@/lib/guards";
 import { createNotification } from "@/lib/actions/notifications";
 import { saveUploadedFile, UploadError } from "@/lib/upload";
+import { postTaskAssigned } from "@/lib/slack";
 
 export async function createTask(formData: FormData) {
   const session = await requireStaff();
@@ -68,6 +69,11 @@ export async function createTask(formData: FormData) {
     );
   }
 
+  if (assigneeId) {
+    const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
+    if (assignee) await postTaskAssigned(task, assignee);
+  }
+
   revalidatePath("/admin/tasks");
 }
 
@@ -128,7 +134,7 @@ export async function updateTask(taskId: string, formData: FormData) {
 
   const existing = await prisma.task.findUnique({ where: { id: taskId } });
 
-  await prisma.task.update({
+  const updated = await prisma.task.update({
     where: { id: taskId },
     data: {
       title,
@@ -148,6 +154,9 @@ export async function updateTask(taskId: string, formData: FormData) {
       title,
       `/admin/tasks/${taskId}`
     );
+
+    const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
+    if (assignee) await postTaskAssigned(updated, assignee);
   }
 
   revalidatePath("/admin/tasks");
@@ -175,17 +184,21 @@ export async function createTasksBulk(rows: BulkTaskRow[]) {
   const validRows = rows.filter((r) => r.title.trim());
   if (validRows.length === 0) throw new Error("At least one task title is required");
 
-  await prisma.task.createMany({
-    data: validRows.map((r) => ({
-      title: r.title.trim(),
-      description: r.description.trim() || null,
-      dueDate: r.dueDate ? new Date(r.dueDate) : null,
-      assigneeId: r.assigneeId || null,
-      clientId: r.clientId || null,
-      status: r.status || "TODO",
-      createdById: session.user.id,
-    })),
-  });
+  const created = await prisma.$transaction(
+    validRows.map((r) =>
+      prisma.task.create({
+        data: {
+          title: r.title.trim(),
+          description: r.description.trim() || null,
+          dueDate: r.dueDate ? new Date(r.dueDate) : null,
+          assigneeId: r.assigneeId || null,
+          clientId: r.clientId || null,
+          status: r.status || "TODO",
+          createdById: session.user.id,
+        },
+      })
+    )
+  );
 
   // Send notifications to unique assignees (excluding the creator)
   const assigneeIds = [...new Set(
@@ -200,6 +213,14 @@ export async function createTasksBulk(rows: BulkTaskRow[]) {
       validRows.filter((r) => r.assigneeId === assigneeId).map((r) => r.title.trim()).join(", ").slice(0, 140),
       `/admin/tasks`
     );
+
+    const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
+    if (assignee) {
+      const tasksForAssignee = created.filter((t) => t.assigneeId === assigneeId);
+      for (const t of tasksForAssignee) {
+        await postTaskAssigned(t, assignee);
+      }
+    }
   }
 
   revalidatePath("/admin/tasks");
@@ -236,7 +257,7 @@ export async function updateTaskField(
     data.status = value;
   }
 
-  await prisma.task.update({ where: { id: taskId }, data });
+  const updated = await prisma.task.update({ where: { id: taskId }, data });
 
   if (field === "assigneeId" && value && value !== task.assigneeId) {
     await createNotification(
@@ -246,6 +267,9 @@ export async function updateTaskField(
       task.title,
       `/admin/tasks/${taskId}`
     );
+
+    const assignee = await prisma.user.findUnique({ where: { id: value } });
+    if (assignee) await postTaskAssigned(updated, assignee);
   }
 
   revalidatePath("/admin/tasks");

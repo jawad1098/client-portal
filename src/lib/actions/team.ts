@@ -40,6 +40,7 @@ export async function updateTeamMember(userId: string, formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const role = String(formData.get("role") || "TEAM") as "ADMIN" | "TEAM";
+  const slackUserId = String(formData.get("slackUserId") || "").trim();
 
   if (!name || !email) {
     throw new Error("Name and email are required");
@@ -55,7 +56,7 @@ export async function updateTeamMember(userId: string, formData: FormData) {
 
   await prisma.user.update({
     where: { id: userId },
-    data: { name, email, role },
+    data: { name, email, role, slackUserId: slackUserId || null },
   });
 
   revalidatePath("/admin/team");

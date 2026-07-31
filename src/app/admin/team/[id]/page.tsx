@@ -81,6 +81,19 @@ export default async function TeamMemberPage({
               <option value="ADMIN">Admin</option>
             </select>
           </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-ink">Slack member ID</label>
+            <input
+              name="slackUserId"
+              defaultValue={member.slackUserId ?? ""}
+              placeholder="U0123ABC"
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-green"
+            />
+            <p className="mt-1 text-xs text-slate">
+              From their Slack profile &rarr; More &rarr; Copy member ID. Used to @mention them in task
+              notifications.
+            </p>
+          </div>
           <button
             type="submit"
             className="self-start rounded-lg bg-green px-4 py-2 text-sm font-semibold text-white hover:bg-green-dark"
